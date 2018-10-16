@@ -1,0 +1,8 @@
+// Rename to BotConfig.json and add your bot token to this
+// Example:
+// {
+//    "token": "MyTokenHere"
+// }
+{
+  "token": ""
+}
