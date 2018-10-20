@@ -71,21 +71,21 @@ namespace SlccDiscordBot
         public static void SetUp(ref BotConfig bc)
         {
             JsonTextReader reader;
-            try
-            {
-                // This is good for development where I've got the config with the project
-                reader = new JsonTextReader(new StreamReader("..\\..\\..\\json\\BotConfig.json"));
-                bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("..\\..\\..\\json\\BotConfig.json"));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Project Level SetUp Exception:\n\t{e.Message}");
-            }
+            //try
+            //{
+            //    // This is good for development where I've got the config with the project
+            //    reader = new JsonTextReader(new StreamReader("..\\..\\..\\json\\BotConfig.json"));
+            //    bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("..\\..\\..\\json\\BotConfig.json"));
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine($"Project Level SetUp Exception:\n\t{e.Message}");
+            //}
             try
             {
                 // This is good for deployment where I've got the config with the executable
-                reader = new JsonTextReader(new StreamReader("BotConfig.json"));
-                bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("BotConfig.json"));
+                reader = new JsonTextReader(new StreamReader("json\\BotConfig.json"));
+                bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("json\\BotConfig.json"));
             }
             catch (Exception e)
             {
