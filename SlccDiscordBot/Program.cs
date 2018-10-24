@@ -13,6 +13,10 @@ namespace SlccDiscordBot
         DiscordSocketClient client;
         BotConfig botConfig = new BotConfig();
 
+        // Specific to plugins
+        // TODO: Find a better way to handle these
+        Calendar calendar = new Calendar();
+
 
         public static void Main(string[] args)
                     => new Program().MainAsync().GetAwaiter().GetResult();
@@ -49,9 +53,20 @@ namespace SlccDiscordBot
 
                 string[] substring = msg.Split(" ", 2);
 
-                if (substring.Length != 1)
+                if (substring.Length >= 1)
                 {
-                    await message.Channel.SendMessageAsync($"I'm still being made. I don't do anything cool yet.\nCheck me out at: https://github.com/Zucce05/SlccDiscordBot");
+                    switch(substring[0])
+                    {
+                        case "calendar":
+                            await message.Channel.SendMessageAsync($"```{calendar.ListAllEvents()}```");
+                            break;
+                        case "help":
+                            await message.Channel.SendMessageAsync("Current commands:\n\t``^calendar`` for SLCC calendar events\n\t``^help``");
+                            break;
+                        default:
+                            await message.Channel.SendMessageAsync("Current commands:\n\t``^calendar`` for SLCC calendar events\n\t``^help``");
+                            break;
+                    }
                 }
                 else
                 {
@@ -71,16 +86,6 @@ namespace SlccDiscordBot
         public static void SetUp(ref BotConfig bc)
         {
             JsonTextReader reader;
-            //try
-            //{
-            //    // This is good for development where I've got the config with the project
-            //    reader = new JsonTextReader(new StreamReader("..\\..\\..\\json\\BotConfig.json"));
-            //    bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("..\\..\\..\\json\\BotConfig.json"));
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine($"Project Level SetUp Exception:\n\t{e.Message}");
-            //}
             try
             {
                 // This is good for deployment where I've got the config with the executable
