@@ -86,6 +86,19 @@ namespace SlccDiscordBot
         public static void SetUp(ref BotConfig bc)
         {
             JsonTextReader reader;
+<<<<<<< HEAD
+=======
+            //try
+            //{
+            //    // This is good for development where I've got the config with the project
+            //    reader = new JsonTextReader(new StreamReader("..\\..\\..\\json\\BotConfig.json"));
+            //    bc = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText("..\\..\\..\\json\\BotConfig.json"));
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine($"Project Level SetUp Exception:\n\t{e.Message}");
+            //}
+>>>>>>> master
             try
             {
                 // This is good for deployment where I've got the config with the executable

@@ -19,4 +19,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="json\BotConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
