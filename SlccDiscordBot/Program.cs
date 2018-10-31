@@ -23,6 +23,14 @@ namespace SlccDiscordBot
 
         public async Task MainAsync()
         {
+
+
+
+            string dateString = "2018-10-31";
+            bool x = DateTime.TryParseExact(dateString, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
+
+                
+
             client = new DiscordSocketClient
             (new DiscordSocketConfig
             {
