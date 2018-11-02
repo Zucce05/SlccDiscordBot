@@ -26,6 +26,7 @@ namespace SlccDiscordBot.classes
         HashSet<string> calendars = new HashSet<string>();
         List<Events> CombinedEventList = new List<Events>();
         List<Event> eventItems = new List<Event>();
+        const int REQUESTDAYS = 8;
 
         public Calendar()
         {
@@ -57,7 +58,7 @@ namespace SlccDiscordBot.classes
             calendars.Add("en.usa#holiday@group.v.calendar.google.com");
         }
 
-        public string ListAllEvents()
+        public async Task ListAllEvents(SocketMessage message)
         {
             CombinedEventList = new List<Events>();
             eventItems = new List<Event>();
@@ -68,24 +69,41 @@ namespace SlccDiscordBot.classes
                 CombinedEventList.Add(CreateEventsList(c));
             }
             // Sort the CombinedEventList (hopefully by date)
-            foreach (Events events in CombinedEventList)
+            DateTime currentDays = new DateTime();
+            for (int i = 0; i < REQUESTDAYS; i++)
             {
-                if (events.Items != null && events.Items.Count > 0)
+                currentDays = currentDays.AddDays(i);
+                List<Event> today = new List<Event>();
+                foreach (Events events in CombinedEventList)
                 {
-                    foreach (Event item in events.Items)
+                    if (events.Items != null && events.Items.Count > 0)
                     {
-                        eventItems.Add(item);
-                        Console.Out.WriteLine($"Date: {item.Start.Date}");
-                        Console.Out.WriteLine($"DateTime: {item.Start.DateTime}");
-                        DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
-                        Console.Out.WriteLine($"ParsedTime: {dt.ToString("yyyy-MM-dd")}");
-                        Console.Out.WriteLine(String.Empty);
+                        foreach (Event item in events.Items)
+                        {
+                            if(item.Start.Date != null
+                                && DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
+                                && dt.ToString("yyyy-MM-dd") == currentDays.ToString("yyyy-MM-dd"))
+                            {
+                                today.Add(item);
+                            }
+                            else if(item.Start.DateTime.ToString() == currentDays.ToString("yyyy-MM-dd"))
+                            {
+                                today.Add(item);
+                            }
+
+
+                            eventItems.Add(item);
+                            Console.Out.WriteLine($"Date: {item.Start.Date}");
+                            Console.Out.WriteLine($"DateTime: {item.Start.DateTime}");
+                            //DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
+                            //Console.Out.WriteLine($"ParsedTime: {dt.ToString("yyyy-MM-dd")}");
+                            Console.Out.WriteLine(String.Empty);
+                        }
                     }
                 }
+                await SendChannelMessageAsync(today, message);
             }
-
-            return string.Empty;
-            
+                        
             // foreach (Events events in CombinedEventList)
             // {
             //     if (events.Items != null && events.Items.Count > 0)
@@ -103,14 +121,32 @@ namespace SlccDiscordBot.classes
             //         returnString += ("\n");
             //     }
             // }
-            return returnString;
+        }
+
+        public async Task SendChannelMessageAsync(List<Event> events, SocketMessage message)
+        {
+            // calendar Channel ID: 504509810755239936
+            SocketTextChannel test = new SocketTextChannel();
+
+            var builder = new EmbedBuilder()
+            {
+                Color = Color.Blue,
+                Title = "Tales of Nowhere",
+                Description = $"Famous Saying: '{this.CharacterQuote}'",
+                ImageUrl = $"{this.ImageUrl}",
+                Timestamp = DateTimeOffset.Now,
+            }
+                            .WithFooter(footer => footer.Text = $"{this.CharacterDescription}")
+                            .AddField("Name: ", $"{this.CharacterName}");
+
+            await message.Channel.SendMessageAsync(this.Lore, false, builder.Build());
         }
 
         private Events CreateEventsList(string calendar)
         {
             EventsResource.ListRequest request = service.Events.List(calendar);
             request.TimeMin = DateTime.Now;
-            request.TimeMax = DateTime.Today.AddDays(15);
+            request.TimeMax = DateTime.Today.AddDays(REQUESTDAYS);
             request.ShowDeleted = false;
             request.SingleEvents = true;
             // request.MaxResults = 10;

@@ -23,6 +23,14 @@ namespace SlccDiscordBot
 
         public async Task MainAsync()
         {
+
+
+
+            string dateString = "2018-10-31";
+            bool x = DateTime.TryParseExact(dateString, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
+
+                
+
             client = new DiscordSocketClient
             (new DiscordSocketConfig
             {
@@ -58,7 +66,8 @@ namespace SlccDiscordBot
                     switch(substring[0])
                     {
                         case "calendar":
-                            await message.Channel.SendMessageAsync($"```{calendar.ListAllEvents()}```");
+                            //await message.Channel.SendMessageAsync($"```{calendar.ListAllEvents()}```");
+                            await calendar.ListAllEvents(message);
                             break;
                         case "help":
                             await message.Channel.SendMessageAsync("Current commands:\n\t``^calendar`` for SLCC calendar events\n\t``^help``");
