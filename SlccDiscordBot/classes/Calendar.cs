@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Requests;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System;
@@ -53,7 +54,7 @@ namespace SlccDiscordBot.classes
             calendars.Add("bruinmail.slcc.edu_3peeg5obg47g233n28p496uhd8@group.calendar.google.com");
             calendars.Add("bruinmail.slcc.edu_3d3j70osj9jnt2gquuqt64b2es@group.calendar.google.com");
             calendars.Add("bruinmail.slcc.edu_cpmd62p4gl29taa34956bj529s@group.calendar.google.com");
-            // calendars.Add("en.usa#holiday@group.v.calendar.google.com");
+            calendars.Add("en.usa#holiday@group.v.calendar.google.com");
         }
 
         public string ListAllEvents()
@@ -74,28 +75,17 @@ namespace SlccDiscordBot.classes
                     foreach (Event item in events.Items)
                     {
                         eventItems.Add(item);
+                        Console.Out.WriteLine($"Date: {item.Start.Date}");
+                        Console.Out.WriteLine($"DateTime: {item.Start.DateTime}");
+                        DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
+                        Console.Out.WriteLine($"ParsedTime: {dt.ToString("yyyy-MM-dd")}");
+                        Console.Out.WriteLine(String.Empty);
                     }
                 }
             }
 
-            returnString += "Upcoming events:\n";
-            for (int i = 0; i < 90; i++)
-            {
-                DateTime requestDate = DateTime.Today.AddDays(i);
-                bool dateAdded = false;
-                // returnString += ($"\tDate: {requestDate.ToShortDateString()}\n");
-                foreach (Event item in eventItems)
-                {
-                    if (Convert.ToDateTime(item.Start.Date).Date == requestDate.Date)
-                    {
-                        if (!dateAdded)
-                        {
-                            returnString += ($"\tDate: {requestDate.ToShortDateString()}\n");
-                        }
-                        returnString += $"\t\t{item.Summary}\n\t\tWhen: {item.Start}-{item.End}\n";
-                    }
-                }
-            }
+            return string.Empty;
+            
             // foreach (Events events in CombinedEventList)
             // {
             //     if (events.Items != null && events.Items.Count > 0)
@@ -120,18 +110,14 @@ namespace SlccDiscordBot.classes
         {
             EventsResource.ListRequest request = service.Events.List(calendar);
             request.TimeMin = DateTime.Now;
-            request.TimeMax = DateTime.Today.AddDays(90);
+            request.TimeMax = DateTime.Today.AddDays(15);
             request.ShowDeleted = false;
             request.SingleEvents = true;
             // request.MaxResults = 10;
+            // request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
             request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
 
             return request.Execute();
-        }
-
-        private void SortEventsList(ref List<Events> eventsList)
-        {
-            eventsList.Sort();
         }
 
         // private async Task SendChannelMessageAsync(SocketMessage message)
