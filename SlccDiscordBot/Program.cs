@@ -23,20 +23,12 @@ namespace SlccDiscordBot
 
         public async Task MainAsync()
         {
-
-
-
-            string dateString = "2018-10-31";
-            bool x = DateTime.TryParseExact(dateString, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
-
-                
-
             client = new DiscordSocketClient
             (new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Debug
                 //LogLevel = LogSeverity.Verbose
-                //LogLegel = LogSeverity.Info
+                //LogLevel = LogSeverity.Info
             });
 
             SetUp(ref botConfig);
@@ -66,8 +58,25 @@ namespace SlccDiscordBot
                     switch(substring[0])
                     {
                         case "calendar":
+                            foreach(SocketGuild g in client.Guilds)
+                            {
+                                if(g.Id.ToString() == "488957295271608320")
+                                {
+                                    foreach(SocketTextChannel c in g.TextChannels)
+                                    {
+                                        if(c.Id.ToString() == "504509810755239936")
+                                        {
+                                            await calendar.ListAllEvents(c);
+                                            Console.Out.WriteLine("Made it this far");
+                                            //c.SendMessageAsync("Test: Please Ignore");
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
                             //await message.Channel.SendMessageAsync($"```{calendar.ListAllEvents()}```");
-                            await calendar.ListAllEvents(message);
+                            // await calendar.ListAllEvents(message);
                             break;
                         case "help":
                             await message.Channel.SendMessageAsync("Current commands:\n\t``^calendar`` for SLCC calendar events\n\t``^help``");

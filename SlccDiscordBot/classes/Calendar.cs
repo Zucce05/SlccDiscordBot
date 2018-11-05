@@ -26,7 +26,7 @@ namespace SlccDiscordBot.classes
         HashSet<string> calendars = new HashSet<string>();
         List<Events> CombinedEventList = new List<Events>();
         List<Event> eventItems = new List<Event>();
-        const int REQUESTDAYS = 8;
+        const int REQUESTDAYS = 90;
 
         public Calendar()
         {
@@ -58,8 +58,10 @@ namespace SlccDiscordBot.classes
             calendars.Add("en.usa#holiday@group.v.calendar.google.com");
         }
 
-        public async Task ListAllEvents(SocketMessage message)
+        public async Task ListAllEvents(SocketTextChannel channel)
         {
+
+            await channel.DeleteMessagesAsync(channel.GetMessagesAsync().FlattenAsync<IMessage>().Result);
             CombinedEventList = new List<Events>();
             eventItems = new List<Event>();
             string returnString = string.Empty;
@@ -68,11 +70,10 @@ namespace SlccDiscordBot.classes
             {
                 CombinedEventList.Add(CreateEventsList(c));
             }
+            DateTime currentDate = DateTime.Today;
             // Sort the CombinedEventList (hopefully by date)
-            DateTime currentDays = new DateTime();
-            for (int i = 0; i < REQUESTDAYS; i++)
+            for (int i = 0; i <= REQUESTDAYS; i++)
             {
-                currentDays = currentDays.AddDays(i);
                 List<Event> today = new List<Event>();
                 foreach (Events events in CombinedEventList)
                 {
@@ -80,66 +81,53 @@ namespace SlccDiscordBot.classes
                     {
                         foreach (Event item in events.Items)
                         {
-                            if(item.Start.Date != null
+                            if (item.Start.Date != null
                                 && DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
-                                && dt.ToString("yyyy-MM-dd") == currentDays.ToString("yyyy-MM-dd"))
+                                && dt.ToString("yyyy-MM-dd") == currentDate.ToString("yyyy-MM-dd"))
                             {
                                 today.Add(item);
                             }
-                            else if(item.Start.DateTime.ToString() == currentDays.ToString("yyyy-MM-dd"))
+                            else if (item.Start.DateTime.ToString() == currentDate.ToString("yyyy-MM-dd"))
                             {
                                 today.Add(item);
                             }
 
-
-                            eventItems.Add(item);
-                            Console.Out.WriteLine($"Date: {item.Start.Date}");
-                            Console.Out.WriteLine($"DateTime: {item.Start.DateTime}");
-                            //DateTime.TryParseExact(item.Start.Date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime dt);
-                            //Console.Out.WriteLine($"ParsedTime: {dt.ToString("yyyy-MM-dd")}");
-                            Console.Out.WriteLine(String.Empty);
+                            
                         }
                     }
                 }
-                await SendChannelMessageAsync(today, message);
+                if (today.Count > 0)
+                {
+                    await SendChannelMessageAsync(today, channel, currentDate);
+                }
+                currentDate = currentDate.AddDays(1);
             }
-                        
-            // foreach (Events events in CombinedEventList)
-            // {
-            //     if (events.Items != null && events.Items.Count > 0)
-            //     {
-            //         returnString += ($"Calendar Description: {events.Description}\n");
-            //         foreach (var eventItem in events.Items)
-            //         {
-            //             string when = eventItem.Start.DateTime.ToString();
-            //             if (String.IsNullOrEmpty(when))
-            //             {
-            //                 when = eventItem.Start.Date;
-            //             }
-            //             returnString += ($"\t{eventItem.Summary} ({when})\n");
-            //         }
-            //         returnString += ("\n");
-            //     }
-            // }
+            
         }
 
-        public async Task SendChannelMessageAsync(List<Event> events, SocketMessage message)
+        public async Task SendChannelMessageAsync(List<Event> events, SocketTextChannel channel, DateTime date)
         {
             // calendar Channel ID: 504509810755239936
-            SocketTextChannel test = new SocketTextChannel();
-
-            var builder = new EmbedBuilder()
+            //await messages.FlattenAsync<IMessage>();
+            foreach (Event e in events)
             {
-                Color = Color.Blue,
-                Title = "Tales of Nowhere",
-                Description = $"Famous Saying: '{this.CharacterQuote}'",
-                ImageUrl = $"{this.ImageUrl}",
-                Timestamp = DateTimeOffset.Now,
+                var builder = new EmbedBuilder()
+                {
+                    Color = Color.Blue,
+                    Title = $"{date.DayOfWeek}",
+                }
+                //.WithFooter(footer => footer.Text = $"{this.CharacterDescription}")
+                //    foreach(Event e in events)
+                //{
+                .AddField("Event Info: ", $"Summary: {e.Summary}\n" +
+                    $"Location: {e.Location}\n" +
+                    $"Event Link: {e.HtmlLink}\n" +
+                    $"Start and End: {e.Start.Date.ToString()} to {e.End.Date.ToString()}\n");
+                await channel.SendMessageAsync($"***{date.ToShortDateString()}***", false, builder.Build());
             }
-                            .WithFooter(footer => footer.Text = $"{this.CharacterDescription}")
-                            .AddField("Name: ", $"{this.CharacterName}");
+            //.AddField("Description: ", $"{}");
 
-            await message.Channel.SendMessageAsync(this.Lore, false, builder.Build());
+            //await channel.SendMessageAsync($"***{date.ToShortDateString()}***", false, builder.Build());
         }
 
         private Events CreateEventsList(string calendar)
@@ -155,22 +143,6 @@ namespace SlccDiscordBot.classes
 
             return request.Execute();
         }
-
-        // private async Task SendChannelMessageAsync(SocketMessage message)
-        // {
-        //     var builder = new EmbedBuilder()
-        //     {
-        //         Color = Color.Blue,
-        //         Title = "Tales of Nowhere",
-        //         Description = $"Famous Saying: '{this.CharacterQuote}'",
-        //         ImageUrl = $"{this.ImageUrl}",
-        //         Timestamp = DateTimeOffset.Now,
-        //     }
-        //                     .WithFooter(footer => footer.Text = $"{this.CharacterDescription}")
-        //                     .AddField("Name: ", $"{this.CharacterName}");
-
-        //     await message.Channel.SendMessageAsync(this.Lore, false, builder.Build());
-        // }
 
     }
 }
