@@ -26,7 +26,7 @@ namespace SlccDiscordBot.classes
         HashSet<string> calendars = new HashSet<string>();
         List<Events> CombinedEventList = new List<Events>();
         List<Event> eventItems = new List<Event>();
-        const int REQUESTDAYS = 90;
+        const int REQUESTDAYS = 9;
 
         public Calendar()
         {
@@ -70,9 +70,9 @@ namespace SlccDiscordBot.classes
             {
                 CombinedEventList.Add(CreateEventsList(c));
             }
-            DateTime currentDate = DateTime.Today;
+            DateTime currentDate = DateTime.Today.AddDays(REQUESTDAYS);
             // Sort the CombinedEventList (hopefully by date)
-            for (int i = 0; i <= REQUESTDAYS; i++)
+            for (int i = REQUESTDAYS; i >= 0; i++)
             {
                 List<Event> today = new List<Event>();
                 foreach (Events events in CombinedEventList)
@@ -87,12 +87,13 @@ namespace SlccDiscordBot.classes
                             {
                                 today.Add(item);
                             }
-                            else if (item.Start.DateTime.ToString() == currentDate.ToString("yyyy-MM-dd"))
+                            else if (item.Start.DateTime.ToString() == currentDate.ToString())
                             {
                                 today.Add(item);
                             }
 
-                            
+
+                            Console.Out.WriteLine(item.Start.DateTime.ToString());
                         }
                     }
                 }
@@ -100,9 +101,9 @@ namespace SlccDiscordBot.classes
                 {
                     await SendChannelMessageAsync(today, channel, currentDate);
                 }
-                currentDate = currentDate.AddDays(1);
+                currentDate = currentDate.AddDays(-1);
             }
-            
+
         }
 
         public async Task SendChannelMessageAsync(List<Event> events, SocketTextChannel channel, DateTime date)
